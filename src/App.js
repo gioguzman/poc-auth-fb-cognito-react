@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import logo from './logo.svg';
 import './App.css';
 import { Formik, Field, Form } from 'formik';
@@ -34,19 +34,37 @@ Amplify.configure({
 
 function App() {
 
+  const [user, setUser] = useState(null)
+
   useEffect(() => {
     console.log("testing")
     Auth.currentAuthenticatedUser({
       bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-    }).then(user => console.log(user))
+    }).then(user => setUser(user))
     .catch(err => console.log(err));
   }, [])
+
+  if (user){
+    console.log("user exist");
+    return (<div className="App">
+      <h3> Signed in </h3>
+
+      <button onClick={()=> {
+        Auth.signOut().then(() => {
+          setUser(null)
+        })
+      }}>Signout</button>
+    </div>)
+  }
 
   return (
     <div className="App">
       <button onClick={() => {
         Auth.federatedSignIn({ provider: 'Facebook' })
       }}> Facebook signin </button>
+      <button onClick={() => {
+        Auth.federatedSignIn({ provider: "Google"})
+      }}> Gmail signin </button>
     </div>
   );
 }
